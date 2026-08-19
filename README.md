@@ -21,7 +21,7 @@ npm run preview
 
 ## Before you deploy
 - Add a real profile photo: replace `.hero__avatar-placeholder` in `src/components/Hero.jsx` with an `<img>` tag pointing at your photo.
-- Drop your actual resume PDF into the `public/` folder as `Ayush_Mishra_Resume.pdf` (the Download Resume button already links to it).
+- Drop your actual resume PDF into the `public/` (the Download Resume button already links to it).
 - Update the LinkedIn URL placeholder in `src/components/Contact.jsx`.
 - Wire the contact form up to a backend (Formspree, EmailJS, or your own API route) inside `handleSubmit` in `src/components/Contact.jsx` — it currently only simulates a send.
 - Update the "Live" project links in `src/components/Projects.jsx` once your projects are deployed.
