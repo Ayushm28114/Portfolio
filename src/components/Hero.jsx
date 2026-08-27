@@ -53,7 +53,11 @@ export default function Hero() {
             <button className="btn btn--primary" onClick={() => scrollTo('#projects')}>
               View Projects
             </button>
-            <a className="btn btn--ghost" href="https://ayushm28114.github.io/Portfolio/Ayush_Mishra_Resume.pdf" download>
+            <a
+              className="btn btn--ghost"
+              href={`${import.meta.env.BASE_URL}Ayush_Mishra_Resume.pdf`}
+              download
+            >
               <span>Download Resume</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
