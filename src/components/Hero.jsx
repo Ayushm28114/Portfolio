@@ -46,7 +46,7 @@ export default function Hero() {
           </div>
           <p className="hero__summary">
             Computer Science undergrad who builds fast, scalable interfaces with React and ships
-            them end‑to‑end — from schema to API to pixel. Cut external API latency by 80% on a
+            them end-to-end — from schema to API to pixel. Cut external API latency by 80% on a
             production caching layer and led a hackathon team through the Smart India Hackathon.
           </p>
           <div className="hero__cta-row">

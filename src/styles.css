@@ -438,12 +438,14 @@ img, svg { display: block; max-width: 100%; }
   align-items: center;
   gap: 8px;
 }
+
 .hero__scroll-line {
   width: 1px;
   height: 28px;
   background: linear-gradient(var(--accent), transparent);
   animation: scrollLine 1.8s ease-in-out infinite;
 }
+
 @keyframes scrollLine {
   0% { transform: scaleY(0.3); opacity: 0.4; }
   50% { transform: scaleY(1); opacity: 1; }
