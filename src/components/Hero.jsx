@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 
-const ROLES = ['React.js Developer', 'Frontend Engineer', 'Full-Stack Builder', 'Problem Solver']
+const ROLES = ['React.js Developer', 'Frontend Engineer', 'Full-Stack Developer', 'Backend Developer', 'Software Engineer']
 
 export default function Hero() {
   const [roleIndex, setRoleIndex] = useState(0)
@@ -33,7 +33,7 @@ export default function Hero() {
     <section id="top" className="hero">
       <div className="hero__glow" aria-hidden="true" />
       <div className="hero__inner">
-        <div className="hero__text" data-reveal>
+        <div className="hero__text">
           <p className="eyebrow">// Greater Noida, India — open to opportunities</p>
           <h1 className="hero__headline">
             Ayush Mishra
@@ -68,15 +68,15 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="hero__visual" data-reveal>
+        <div className="hero__visual">
           <div className="hero__card">
             <div className="hero__card-top">
               <span className="dot-red" /><span className="dot-yellow" /><span className="dot-green" />
               <span className="hero__card-filename">profile.jsx</span>
             </div>
-            <div className="hero__avatar-frame">
-              <img src="F:\portfolio\public\Ayush'.jpg" alt="Ayush Mishra" />
-            </div>
+            {/* <div className="hero__avatar-frame">
+              <img src="/Ayush'.jpg" alt="Ayush Mishra" />
+            </div> */}
             <div className="hero__card-code">
               <p><span className="tok-key">const</span> <span className="tok-var">engineer</span> = {'{'}</p>
               <p>&nbsp;&nbsp;stack: <span className="tok-str">'React, JS, Python'</span>,</p>

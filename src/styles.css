@@ -393,13 +393,15 @@ img, svg { display: block; max-width: 100%; }
 }
 
 .hero__avatar-frame {
-  padding: 36px 36px 10px;
+  /* height: 20px;
+  width: 20px; */
+  padding: 18px 18px 5px;
   display: flex;
   justify-content: center;
 }
 .hero__avatar-placeholder {
-  width: 148px;
-  height: 148px;
+  width: 48px;
+  height: 48px;
   border-radius: 28px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #05110F;
