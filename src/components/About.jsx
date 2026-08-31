@@ -9,7 +9,7 @@ const STATS = [
 ]
 
 export default function About() {
-  const ref = useReveal()
+  const ref = useReveal(
 
   return (
     <section id="about" className="section" ref={ref}>
