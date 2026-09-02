@@ -67,7 +67,7 @@ export default function Hero() {
           <div className="hero__socials">
             <a href="https://github.com/Ayushm28114" target="_blank" rel="noreferrer">GitHub</a>
             <span className="dot">·</span>
-            <a href="mailto:ayushmishra28114@gmail.com">Email</a>
+            <a href="mailto:ayushm281104@gmail.com">Email</a>
             <span className="dot">·</span>
           </div>
         </div>
@@ -78,9 +78,6 @@ export default function Hero() {
               <span className="dot-red" /><span className="dot-yellow" /><span className="dot-green" />
               <span className="hero__card-filename">profile.jsx</span>
             </div>
-            {/* <div className="hero__avatar-frame">
-              <img src="/Ayush'.jpg" alt="Ayush Mishra" />
-            </div> */}
             <div className="hero__card-code">
               <p><span className="tok-key">const</span> <span className="tok-var">engineer</span> = {'{'}</p>
               <p>&nbsp;&nbsp;stack: <span className="tok-str">'React, JS, Python'</span>,</p>
