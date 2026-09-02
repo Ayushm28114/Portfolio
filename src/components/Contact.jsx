@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useReveal } from '../hooks/useReveal.js'
 
 const CONTACT_DETAILS = [
-  { label: 'Email', value: 'ayushmishra28114@gmail.com', href: 'mailto:ayushmishra28114@gmail.com' },
+  { label: 'Email', value: 'ayushm281104@gmail.com', href: 'mailto:ayushm281104@gmail.com' },
   { label: 'Location', value: 'Greater Noida West, UP, India', href: null },
   { label: 'GitHub', value: 'github.com/Ayushm28114', href: 'https://github.com/Ayushm28114' },
   { label: 'LinkedIn', value: 'linkedin.com/in/ayush-mishra', href: 'https://linkedin.com' },
