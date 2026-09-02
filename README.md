@@ -1,5 +1,5 @@
 # Ayush Mishra — Portfolio
-Live Link for this : <a href="https://ayushm28114.github.io/Portfolio/" target="blank">Ayush_Mishra_Portfolio</a>
+Live Link for this : <a href="https://ayushm28114.github.io/Portfolio/" target="_blank">Ayush_Mishra_Portfolio</a>
 ## Run locally in VS Code
 
 1. Open this folder in VS Code.
