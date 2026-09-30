@@ -40,8 +40,39 @@ export default function KageBackground() {
       view.scrollT = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
     }
     readScroll()
+    // Only animate while the hero is on screen. Past the hero the scene
+    // freezes on its last frame (GPU idles); scrolling still nudges the
+    // camera via a single catch-up frame in onScroll below.
+    let heroVisible = true
+    const heroEl = document.getElementById('top')
+    const heroObserver = heroEl
+    ? new IntersectionObserver(
+        ([entry]) => {
+            heroVisible = entry.isIntersecting
+            if (heroVisible && !reducedMotion && !running && !document.hidden) {
+            running = true
+            last = performance.now()
+            rafId = requestAnimationFrame(loop)
+            }
+        },
+        { threshold: 0 }
+        )
+    : null
+    if (heroObserver) heroObserver.observe(heroEl)
 
-    const onScroll = () => readScroll()
+
+    const onScroll = () => {
+    readScroll()
+    // Loop parked past the hero: render one frame so the scroll-driven
+    // camera stays in sync, then go back to sleep.
+    if (reducedMotion || heroVisible || running || document.hidden) return
+    const now = performance.now()
+    const dt = Math.min((now - last) / 1000, 0.05)
+    last = now
+    world.update(dt, now / 1000, view)
+    renderer.render(world.scene, world.camera)
+    }
+
     const onPointer = (e) => {
       // Fine pointers only — touch scroll shouldn't yank the camera.
       if (e.pointerType && e.pointerType !== 'mouse') return
@@ -62,6 +93,10 @@ export default function KageBackground() {
 
     const loop = (now) => {
       if (!running) return
+      if (!heroVisible) {
+        running = false
+        return
+        }
       const dt = Math.min((now - last) / 1000, 0.05)
       last = now
       world.update(dt, now / 1000, view)
@@ -82,7 +117,7 @@ export default function KageBackground() {
       if (document.hidden) {
         running = false
         cancelAnimationFrame(rafId)
-      } else if (!running) {
+      } else if (!running && heroVisible) {
         running = true
         last = performance.now()
         rafId = requestAnimationFrame(loop)
@@ -105,6 +140,7 @@ export default function KageBackground() {
     document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
+      if (heroObserver) heroObserver.disconnect()
       running = false
       cancelAnimationFrame(rafId)
       window.removeEventListener('scroll', onScroll)
