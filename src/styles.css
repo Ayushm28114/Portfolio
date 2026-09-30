@@ -25,8 +25,9 @@
   --panel-hover: #171d2e;
   --border: #232a3b;
   --text: #E9EDF4;
-  --text-muted: #8A93A6;
-  --text-dim: #5C6478;
+  --text-muted: #A9B2C6;
+  --text-dim: #7D869B;
+
   --shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
 }
 
@@ -933,4 +934,101 @@ img, svg { display: block; max-width: 100%; }
   }
   .section { padding: 88px 20px; }
   .timeline__item { grid-template-columns: 20px 1fr; gap: 14px; }
+}
+
+
+/* ============================================================
+   KAGE BACKGROUND — fixed night-temple world behind everything
+   ============================================================ */
+.kage-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 700ms ease;
+}
+.kage-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Readability wash between the world and the content. */
+.kage-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(4, 6, 11, 0.62) 0%,
+    rgba(4, 6, 11, 0.30) 26%,
+    rgba(4, 6, 11, 0.28) 62%,
+    rgba(4, 6, 11, 0.58) 100%
+  );
+}
+[data-theme='light'] .kage-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(246, 247, 251, 0.90) 0%,
+    rgba(246, 247, 251, 0.80) 26%,
+    rgba(246, 247, 251, 0.80) 62%,
+    rgba(246, 247, 251, 0.92) 100%
+  );
+}
+
+.kage-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(2, 4, 9, 0.52) 100%);
+}
+[data-theme='light'] .kage-vignette { opacity: 0.35; }
+
+.kage-grain {
+  position: fixed;
+  inset: -60px;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: kageGrain 0.9s steps(4) infinite;
+}
+@keyframes kageGrain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-18px, 12px); }
+  50% { transform: translate(14px, -20px); }
+  75% { transform: translate(-10px, -14px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Content floats above the world. */
+main, .footer {
+  position: relative;
+  z-index: 4;
+}
+
+/* Let the world breathe through the page surfaces. */
+.section { background: transparent; }
+.section--alt {
+  background: color-mix(in srgb, var(--bg-alt) 42%, transparent);
+}
+
+.hero__card,
+.project-card,
+.stat-card,
+.timeline__card,
+.degree-card,
+.cert-list li,
+.contact__form {
+  background: color-mix(in srgb, var(--panel) 66%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.pill {
+  background: color-mix(in srgb, var(--panel) 68%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
