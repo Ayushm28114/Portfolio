@@ -1032,3 +1032,25 @@ main, .footer {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+
+
+/* ============================================================
+   THEMED SCROLLBAR — slim, theme-matched, accent on hover
+   ============================================================ */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #2b3449 transparent;
+}
+[data-theme='light'] html {
+  scrollbar-color: #c3c9d8 transparent;
+}
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: #2b3449;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover { background: #3d4a68; }
+[data-theme='light'] ::-webkit-scrollbar-thumb { background: #c3c9d8; }
+[data-theme='light'] ::-webkit-scrollbar-thumb:hover { background: #a9b1c5; }

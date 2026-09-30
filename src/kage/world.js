@@ -792,7 +792,7 @@ export function createWorld({ mobile = false } = {}) {
 
     update(dt, t, view) {
       const { scrollT, px, py } = view
-      smooth.t = damp(smooth.t, scrollT, 1.5, dt)
+      smooth.t = damp(smooth.t, scrollT, 0.95, dt)
       smooth.px = damp(smooth.px, px, 3.2, dt)
       smooth.py = damp(smooth.py, py, 3.2, dt)
 
