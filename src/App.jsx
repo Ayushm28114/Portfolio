@@ -9,6 +9,8 @@ import Skills from './components/Skills.jsx'
 import Education from './components/Education.jsx'
 import Contact from './components/Contact.jsx'
 import Footer from './components/Footer.jsx'
+import StatsStrip from './components/StatsStrip'
+import Reveal from './components/Reveal'
 
 const KageBackground = React.lazy(() => import('./components/KageBackground.jsx'))
 
@@ -21,9 +23,10 @@ export default function App() {
       <Navbar />
       <main>
         <Hero />
-        <About />
-        <Experience />
-        <Projects />
+        <StatsStrip />
+        <Reveal><About /></Reveal>
+        <Reveal><Experience /></Reveal>
+        <Reveal><Projects /></Reveal>
         <Skills />
         <Education />
         <Contact />

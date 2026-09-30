@@ -7,7 +7,11 @@ import { createWorld } from '../kage/world.js'
  *
  * - Scroll drives one continuous camera path (composed shot per section).
  * - Pointer adds subtle parallax; click/tap releases a small ember burst.
- * - Dark theme: full world. Light theme: faded to a whisper via CSS opacity.
+ * - Embers shy away from the cursor; meteors streak the sky every ~10-20s.
+ * - The world stays alive on every section — rain, embers, leaves and
+ *   fireflies never freeze.
+ * - Dark theme: full world. Light theme: WebGL parks and the CSS "daybreak"
+ *   (mist + drifting petals) takes over (zero GPU cost).
  * - Respects prefers-reduced-motion (renders a single static frame).
  * - Pauses when the tab is hidden; caps pixel ratio for performance.
  */
@@ -29,10 +33,11 @@ export default function KageBackground() {
     const world = createWorld({ mobile })
     world.setAspect(window.innerWidth, window.innerHeight)
 
-    const view = { scrollT: 0, px: 0, py: 0 }
+    const view = { scrollT: 0, px: 0, py: 0, hasPointer: false }
     let rafId = 0
     let running = true
     let last = performance.now()
+    let isDark = true
 
     const readScroll = () => {
       const el = document.documentElement
@@ -40,37 +45,9 @@ export default function KageBackground() {
       view.scrollT = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0
     }
     readScroll()
-    // Only animate while the hero is on screen. Past the hero the scene
-    // freezes on its last frame (GPU idles); scrolling still nudges the
-    // camera via a single catch-up frame in onScroll below.
-    let heroVisible = true
-    const heroEl = document.getElementById('top')
-    const heroObserver = heroEl
-    ? new IntersectionObserver(
-        ([entry]) => {
-            heroVisible = entry.isIntersecting
-            if (heroVisible && !reducedMotion && !running && !document.hidden) {
-            running = true
-            last = performance.now()
-            rafId = requestAnimationFrame(loop)
-            }
-        },
-        { threshold: 0 }
-        )
-    : null
-    if (heroObserver) heroObserver.observe(heroEl)
-
 
     const onScroll = () => {
-    readScroll()
-    // Loop parked past the hero: render one frame so the scroll-driven
-    // camera stays in sync, then go back to sleep.
-    if (reducedMotion || heroVisible || running || document.hidden) return
-    const now = performance.now()
-    const dt = Math.min((now - last) / 1000, 0.05)
-    last = now
-    world.update(dt, now / 1000, view)
-    renderer.render(world.scene, world.camera)
+      readScroll()
     }
 
     const onPointer = (e) => {
@@ -78,6 +55,7 @@ export default function KageBackground() {
       if (e.pointerType && e.pointerType !== 'mouse') return
       view.px = (e.clientX / window.innerWidth) * 2 - 1
       view.py = (e.clientY / window.innerHeight) * 2 - 1
+      view.hasPointer = true
     }
     const onClick = (e) => {
       if (e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== 'touch') return
@@ -93,10 +71,6 @@ export default function KageBackground() {
 
     const loop = (now) => {
       if (!running) return
-      if (!heroVisible) {
-        running = false
-        return
-        }
       const dt = Math.min((now - last) / 1000, 0.05)
       last = now
       world.update(dt, now / 1000, view)
@@ -117,18 +91,31 @@ export default function KageBackground() {
       if (document.hidden) {
         running = false
         cancelAnimationFrame(rafId)
-      } else if (!running && heroVisible) {
+      } else if (!running && isDark) {
         running = true
         last = performance.now()
         rafId = requestAnimationFrame(loop)
       }
     }
 
-    // Theme: fade the world in light mode so text stays readable.
+    // Theme: dark → the WebGL world. Light → the CSS daybreak takes over,
+    // so park the renderer entirely instead of drawing a faded frame forever.
     const applyTheme = () => {
       const dark = document.documentElement.getAttribute('data-theme') !== 'light'
-      mount.style.opacity = dark ? '1' : '0.14'
+      isDark = dark
+      mount.style.display = dark ? '' : 'none'
+      if (reducedMotion || !dark) {
+        running = false
+        cancelAnimationFrame(rafId)
+        return
+      }
+      if (!running && !document.hidden) {
+        running = true
+        last = performance.now()
+        rafId = requestAnimationFrame(loop)
+      }
     }
+
     applyTheme()
     const themeObserver = new MutationObserver(applyTheme)
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
@@ -140,7 +127,6 @@ export default function KageBackground() {
     document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
-      if (heroObserver) heroObserver.disconnect()
       running = false
       cancelAnimationFrame(rafId)
       window.removeEventListener('scroll', onScroll)
@@ -158,6 +144,21 @@ export default function KageBackground() {
   return (
     <>
       <div ref={mountRef} className="kage-canvas" aria-hidden="true" />
+      <div className="kage-daybreak" aria-hidden="true">
+        <span className="mist" />
+        <span className="mist" />
+        <span className="mist" />
+        <div className="petals" aria-hidden="true">
+          <span className="petal" />
+          <span className="petal" />
+          <span className="petal" />
+          <span className="petal" />
+          <span className="petal" />
+          <span className="petal" />
+          <span className="petal" />
+          <span className="petal" />
+        </div>
+      </div>
       <div className="kage-scrim" aria-hidden="true" />
       <div className="kage-vignette" aria-hidden="true" />
       <div className="kage-grain" aria-hidden="true" />

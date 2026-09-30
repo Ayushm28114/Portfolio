@@ -592,11 +592,25 @@ function buildEmbers(scene, glowTex, rand, lanterns, ambientCount, burstSlots) {
 
   return {
     burst,
-    update(dt, t) {
+    update(dt, t, repel) {
       const p = geo.attributes.position.array
       const cc = geo.attributes.color.array
       for (let i = 0; i < total; i++) {
         const e = parts[i]
+        // Pointer-reactive: embers shy away from the cursor.
+        if (repel) {
+          const dx = e.x - repel.x
+          const dy = e.y - repel.y
+          const dz = e.z - repel.z
+          const d2 = dx * dx + dy * dy + dz * dz
+          if (d2 < 9 && d2 > 0.0001) {
+            const d = Math.sqrt(d2)
+            const f = ((1 - d / 3) * 7 * dt) / d
+            e.x += dx * f
+            e.y += dy * f
+            e.z += dz * f
+          }
+        }
         if (e.ambient) {
           e.y += e.vy * dt
           e.x += Math.sin(t * 2 + i) * 0.35 * dt
@@ -704,6 +718,90 @@ function buildMist(scene, glowTex, rand, count) {
   }
 }
 
+/* Occasional meteors streaking across the upper sky. */
+function buildShootingStars(scene, rand, count) {
+  const stars = []
+  for (let i = 0; i < count; i++) {
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3))
+    geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array([1, 1, 1, 0.05, 0.08, 0.15]), 3))
+    const mat = new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      fog: false, // meteors burn above the fog
+    })
+    const line = new THREE.Line(geo, mat)
+    line.frustumCulled = false
+    line.visible = false
+    scene.add(line)
+    stars.push({
+      line,
+      active: false,
+      x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 0,
+      speed: 0, life: 0, maxLife: 1, tail: 7,
+      next: rand() * 10, // stagger first appearances
+    })
+  }
+
+  function spawn(s) {
+    s.x = -70 + rand() * 90
+    s.y = 26 + rand() * 22
+    s.z = -60 - rand() * 90
+    const dir = new THREE.Vector3(
+      0.8 + rand() * 0.5,
+      -(0.35 + rand() * 0.3),
+      (rand() - 0.5) * 0.2
+    ).normalize()
+    s.dx = dir.x
+    s.dy = dir.y
+    s.dz = dir.z
+    s.speed = 42 + rand() * 26
+    s.life = s.maxLife = 0.9 + rand() * 0.6
+    s.tail = 6 + rand() * 5
+    s.active = true
+    s.line.visible = true
+  }
+
+  return {
+    update(dt) {
+      for (const s of stars) {
+        if (!s.active) {
+          s.next -= dt
+          if (s.next <= 0) spawn(s)
+          continue
+        }
+        s.life -= dt
+        if (s.life <= 0) {
+          s.active = false
+          s.line.visible = false
+          s.next = 10 + rand() * 12
+          continue
+        }
+        const step = s.speed * dt
+        s.x += s.dx * step
+        s.y += s.dy * step
+        s.z += s.dz * step
+        const k = Math.min(1, s.life / (s.maxLife * 0.35))
+        const p = s.line.geometry.attributes.position.array
+        p[0] = s.x
+        p[1] = s.y
+        p[2] = s.z
+        p[3] = s.x - s.dx * s.tail
+        p[4] = s.y - s.dy * s.tail
+        p[5] = s.z - s.dz * s.tail
+        s.line.geometry.attributes.position.needsUpdate = true
+        const c = s.line.geometry.attributes.color
+        c.array[0] = k
+        c.array[1] = k
+        c.array[2] = k
+        c.needsUpdate = true
+      }
+    },
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Camera choreography — one continuous path, composed shots per view  */
 /* ------------------------------------------------------------------ */
@@ -765,6 +863,7 @@ export function createWorld({ mobile = false } = {}) {
   const embers = buildEmbers(scene, glowTex, rand, lanterns, Math.round(130 * q), 240)
   const fireflies = buildFireflies(scene, glowTex, rand, Math.round(34 * q))
   const mist = buildMist(scene, glowTex, rand, Math.round(8 * q))
+  const shootingStars = buildShootingStars(scene, rand, Math.max(2, Math.round(3 * q)))
 
   const posCurve = new THREE.CatmullRomCurve3(
     SHOTS.map((s) => new THREE.Vector3(...s.pos)),
@@ -781,6 +880,8 @@ export function createWorld({ mobile = false } = {}) {
   const tmpPos = new THREE.Vector3()
   const tmpLook = new THREE.Vector3()
   const raycaster = new THREE.Raycaster()
+  const pointerV2 = new THREE.Vector2()
+  const pointerW = new THREE.Vector3()
 
   function damp(current, target, lambda, dt) {
     return current + (target - current) * (1 - Math.exp(-lambda * dt))
@@ -791,7 +892,7 @@ export function createWorld({ mobile = false } = {}) {
     camera,
 
     update(dt, t, view) {
-      const { scrollT, px, py } = view
+      const { scrollT, px, py, hasPointer } = view
       smooth.t = damp(smooth.t, scrollT, 0.95, dt)
       smooth.px = damp(smooth.px, px, 3.2, dt)
       smooth.py = damp(smooth.py, py, 3.2, dt)
@@ -804,17 +905,26 @@ export function createWorld({ mobile = false } = {}) {
       const driftY = Math.cos(t * 0.17) * 0.22
       camera.position.set(
         tmpPos.x + smooth.px * 1.6 + driftX,
-        tmpPos.y + smooth.py * -0.9 + driftY,
+        tmpPos.y + smooth.py * -0.9 + driftX * 0 + driftY,
         tmpPos.z
       )
       camera.lookAt(tmpLook.x + smooth.px * 2.2, tmpLook.y + smooth.py * -1.1, tmpLook.z)
 
+      // Pointer world position (mouse only) — embers shy away from it.
+      let repel = null
+      if (hasPointer) {
+        pointerV2.set(smooth.px, smooth.py)
+        raycaster.setFromCamera(pointerV2, camera)
+        repel = raycaster.ray.at(16, pointerW)
+      }
+
       // Living details.
       rain.update(dt)
       leaves.update(dt, t)
-      embers.update(dt, t)
+      embers.update(dt, t, repel)
       fireflies.update(dt, t)
       mist.update(dt, t)
+      shootingStars.update(dt)
       for (const L of lanterns) {
         const flicker = 0.82 + 0.18 * Math.sin(t * 11 + L.phase) * Math.sin(t * 5.3 + L.phase * 2)
         L.glow.material.opacity = 0.42 + 0.22 * flicker
